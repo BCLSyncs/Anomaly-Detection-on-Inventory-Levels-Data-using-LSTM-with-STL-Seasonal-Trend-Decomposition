@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Detection App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js">
+    <link rel="stylesheet" href="{{ url_for('static', filename='farm4_bg.jpg') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Function to update the table without page refresh
+        function updateTable() {
+            var selectedYear = $('#year').val();
+
+            $.ajax({
+                url: '/getdata', // Define a new route to fetch data
+                method: 'GET',
+                data: { year: selectedYear },
+                success: function(data) {
+                    $('#table-container').html(data);
+                }
+            });
+        }
+    </script>
+    <style>
+        /* Reset some default styles */
+        body, h1, h2, h3, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            background-image: url("{{ url_for('static', filename='farm4_bg.jpg') }}");
+            background-repeat: no-repeat;
+            background-size: cover; /* Use cover to ensure full coverage */
+            background-position: center;
+            color: #333; /* Text color for better contrast */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+            text-align: center; /* Center align content */
+            position: relative;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-top: 20px;
+            color: #007BFF; /* A blue color for headings */
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly more opaque white background */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+            text-align: center; /* Center align content */
+            min-height: 100vh; /* Use min-height instead of height for dynamic content */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .chart-container {
+            flex-grow: 1; /* Allow the chart to grow and fill available space */
+            position: relative;
+        }
+
+        .btn-upload-again, .btn-view-trend {
+            display: inline-block;
+            padding: 10px 20px; /* Larger buttons */
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            position: absolute;
+            bottom: 30px;
+        }
+
+        .btn-upload-again {
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            position: absolute;
+            right: 30px;
+        }
+
+        .btn-upload-again:hover {
+            background-color: #218838; /* Slightly darker green on hover */
+        }
+
+        .btn-view-trend {
+            left: 20px;
+            background-color: #007BFF; /* A blue color for buttons */
+            color: white;
+            border: none;
+            transition: background-color 0.3s; /* Smooth hover effect */
+            position: absolute;
+            left: 30px; /* Adjust the left position to move the button to the left */
+        }
+
+        .btn-view-trend:hover {
+            background-color: #0056b3; /* Slightly darker blue on hover */
+        }
+
+        /* Add spacing between elements */
+        h2, h3 {
+            margin-top: 20px; /* Increased spacing */
+            color: #333; /* Text color for better contrast */
+        }
+
+        h3:not(:empty) {
+            margin-top: 30px; /* Increased spacing */
+            font-size: 18px; /* Slightly larger font size */
+            line-height: 1.5; /* Improved readability */
+            color: #555; /* Slightly darker text color */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inventory Levels Anomaly Detection App</h1>
+        <div class="result">
+            <h2>Anomaly Detection Result</h2>
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+            <h3>Anomalous Data Patterns:</h3>
+            <table class="center-text">
+                {{ table|safe }}
+            </table>
+
+            <h3><span>Recommendation: </span> <span style="font-size: 15px;">Perform RCA (Root Cause Analysis) on the Detected anomalies</span></h3>
+            
+            <h3>Monthly Total Of Anomalies Per Year:</h3>
+
+            <form>
+                <label for="year">Select Year:</label>
+                <select name="year" id="year">
+                    {% for year in available_years %}
+                        <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" onclick="updateTable()">Show Data</button>
+            </form>
+        
+            <!-- Container to display the table -->
+            <div id="table-container" style="margin: 0 auto;"></div>
+
+            <div class="form-group">
+                <a href="/view_trend" class="btn-view-trend">View Trend</a>
+            </div>
+
+            <h3><span>Result: </span> <span style="font-size: 15px;">The most prominent anomaly is '{{ prominent }}' with a total of {{ sum_prominent }} within the file.</span></h3>
+
+            <div class="form-group">
+                <a href="/" class="btn-upload-again">Upload Again</a>
+            </div>
+
+            <h3> </h3>
+            <h3> </h3>
+            <h3> </h3>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Retrieve the data and anomalies from the Flask template variables
+        const chartData = JSON.parse('{{ data|tojson|safe }}');
+        const anomalies = JSON.parse('{{ anomalies|tojson|safe }}');
+        const chartDates = JSON.parse('{{ dates|tojson|safe }}');
+
+        // Determine the minimum and maximum indexes from the anomalies
+        const minIndex = Math.min(...anomalies);
+        const maxIndex = Math.max(...anomalies);
+
+        // Filter the chart data within the range of minIndex and maxIndex
+        const chartDataset = [];
+        const anomalyPoints = [];
+
+        for (let index = minIndex; index <= maxIndex; index++) {
+            const dataPoint = { x: chartDates[index], y: chartData[index] };
+            chartDataset.push(dataPoint);
+
+            if (anomalies.includes(index)) {
+                anomalyPoints.push(dataPoint);
+            }
+        }
+
+        // Extract labels from chartDataset
+        const chartLabels = chartDataset.map(dataPoint => dataPoint.x);
+
+        // Create the chart using Chart.js
+        const ctx = document.getElementById('chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: 'Data',
+                        data: chartDataset,
+                        fill: false,
+                        borderColor: 'blue',
+                        tension: 0.1,
+                        showLine: true
+                    },
+                    {
+                        label: 'Anomalies',
+                        data: anomalyPoints,
+                        pointRadius: 6,
+                        pointBackgroundColor: 'red',
+                        backgroundColor: 'red',
+                        borderWidth: 2,
+                        borderColor: 'red',
+                        tension: 0.1,
+                        showLine: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Ensure the chart can adjust its size
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Inventory_Levels'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Resize the chart canvas to fit its container
+        const chartContainer = document.querySelector('.chart-container');
+        const resizeChartCanvas = () => {
+            const containerWidth = chartContainer.clientWidth;
+            ctx.canvas.width = containerWidth;
+            ctx.canvas.height = containerWidth * 0.5; // Adjust the height as needed for your layout
+            chart.update(); // Update the chart to reflect the new size
+        };
+
+        // Call the resize function initially and on window resize
+        resizeChartCanvas();
+        window.addEventListener('resize', resizeChartCanvas);
+    </script>
+</body>
+</html>

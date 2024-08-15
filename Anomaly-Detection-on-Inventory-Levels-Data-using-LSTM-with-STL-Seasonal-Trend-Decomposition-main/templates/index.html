@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Detection App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            background-image: url("{{ url_for('static', filename='farm_bg.jpg') }}");
+            background-repeat: no-repeat;
+            background-size: 100%;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #detect_button[disabled] {
+            opacity: 0.5; /* Set the desired opacity value */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Anomaly Detection Mobile App</h1>
+        <form action="/detect_anomalies" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="csv_file">Upload CSV File:</label>
+                <input type="file" id="csv_file" name="file" accept=".csv" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="detect_button" disabled>Detect Anomalies</button>
+            </div>
+        </form>
+        <div class="form-group">
+            <a href="{{ url_for('download_template') }}" class="btn-download-template">Download Template</a>
+        </div>
+    </div>
+    <script>
+        const csvFileInput = document.getElementById('csv_file');
+        const detectButton = document.getElementById('detect_button');
+        
+        csvFileInput.addEventListener('change', () => {
+            if (csvFileInput.files.length > 0) {
+                detectButton.removeAttribute('disabled');
+            } else {
+                detectButton.setAttribute('disabled', 'true');
+            }
+        });
+    </script>
+</body>

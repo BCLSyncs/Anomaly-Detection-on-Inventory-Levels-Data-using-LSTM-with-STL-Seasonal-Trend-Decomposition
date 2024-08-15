@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Detection App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            background-image: url("{{ url_for('static', filename='farm3_bg.jpg') }}");
+            background-repeat: no-repeat;
+            background-size: 100%;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        p {
+            font-size: 18px;
+            margin-top: 30px;
+        }
+
+        .btn-upload-again {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        
+        .btn-view-trend {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .congratulations-img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Anomaly Detection App</h1>
+        <img src="{{ url_for('static', filename='congratulations.jpg') }}" alt="Congratulations" class="congratulations-img">
+        <p>Congratulations! There are no anomalous data in your inventory!</p>
+        <a href="/" class="btn-upload-again">Upload Again</a>
+        <a href="/view_trend" class="btn-view-trend">View Trend</a>
+    </div>
+</body>
+</html>
+

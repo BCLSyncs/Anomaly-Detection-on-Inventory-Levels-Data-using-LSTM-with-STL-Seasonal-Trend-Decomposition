@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Detection App - Trend and Seasonality</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            background-image: url("{{ url_for('static', filename='farm2_bg.jpg') }}");
+            background-repeat: no-repeat;
+            background-size: 100%;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Align the Upload Again and View Trend buttons to the bottom-right */
+        .btn-upload-again {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trend and Seasonality</h1>
+
+        <!-- Trend Chart -->
+        <div class="chart-title">Trend</div>
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+
+        <!-- Seasonality Chart -->
+        <div class="chart-title">Seasonality</div>
+        <div class="chart-container">
+            <canvas id="seasonalityChart"></canvas>
+        </div>
+
+        <a href="/" class="btn-upload-again">Upload Again</a>
+        
+
+    </div>
+
+    <script>
+        // Retrieve the trend and seasonality data from the Flask template variables
+        const trendData = JSON.parse('{{ trendData|safe }}');
+        const seasonalityData = JSON.parse('{{ seasonalityData|safe }}');
+        const trendDates = JSON.parse('{{ trendDates|safe }}');
+
+        // Create the trend chart using Chart.js
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendDates,
+                datasets: [{
+                    label: 'Trend',
+                    data: trendData,
+                    fill: false,
+                    borderColor: 'blue',
+                    tension: 0.1,
+                    showLine: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Trend Value'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Create the seasonality chart using Chart.js
+        const seasonalityCtx = document.getElementById('seasonalityChart').getContext('2d');
+        new Chart(seasonalityCtx, {
+            type: 'line',
+            data: {
+                labels: trendDates,
+                datasets: [{
+                    label: 'Seasonality',
+                    data: seasonalityData,
+                    fill: false,
+                    borderColor: 'green',
+                    tension: 0.1,
+                    showLine: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Seasonality Value'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
